@@ -1,0 +1,486 @@
+{
+	"info": {
+		"_postman_id": "4d2d9d45-a166-4a72-b78c-fb943ed975fa",
+		"name": "Mentoring Copy",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26649665"
+	},
+	"item": [
+		{
+			"name": "Username Password Flow",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"pm.collectionVariables.set(\"Access_Token\", jsonData.access_token);",
+							"pm.test(\"Status code is 200\", function (){",
+							" pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "password",
+							"type": "text"
+						},
+						{
+							"key": "client_id",
+							"value": "{{clientId}}",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "{{clientSecret}}",
+							"type": "text"
+						},
+						{
+							"key": "username",
+							"value": "{{username}}",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "{{password}}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/services/oauth2/token",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"services",
+						"oauth2",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SObject Create Account",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();\r",
+							"pm.test(\"Status code is 201\", function (){\r",
+							" pm.response.to.have.status(201);\r",
+							"});\r",
+							"pm.test(\"Id is a non-empty string\", function (){\r",
+							" const responseData = pm.response.json();\r",
+							" pm.expect(responseData.id).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Id should not be empty\")\r",
+							"});\r",
+							"pm.collectionVariables.set(\"id\", jsonData.id);\r",
+							"var rawBodyData = pm.request.body;\r",
+							"var parsedBodyData = JSON.parse(rawBodyData);\r",
+							"pm.collectionVariables.set(\"Name\", parsedBodyData.Name)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"Name\": \"{{Name}}\"\n}"
+				},
+				"url": {
+					"raw": "{{_endpoint}}/services/data/v{{version}}/sobjects/:SOBJECT_API_NAME",
+					"host": [
+						"{{_endpoint}}"
+					],
+					"path": [
+						"services",
+						"data",
+						"v{{version}}",
+						"sobjects",
+						":SOBJECT_API_NAME"
+					],
+					"variable": [
+						{
+							"key": "SOBJECT_API_NAME",
+							"value": "Account"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SObject Basic Information Get Info about Account",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							" pm.response.to.have.status(200);\r",
+							"});\r",
+							"pm.test(\"The Account with created Name exists\", function () {\r",
+							" var jsonData = pm.response.json();\r",
+							" pm.expect(jsonData.recentItems[0].Name).to.eql(pm.collectionVariables.get(\"Name\"));\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{_endpoint}}/services/data/v{{version}}/sobjects/:SOBJECT_API_NAME",
+					"host": [
+						"{{_endpoint}}"
+					],
+					"path": [
+						"services",
+						"data",
+						"v{{version}}",
+						"sobjects",
+						":SOBJECT_API_NAME"
+					],
+					"variable": [
+						{
+							"key": "SOBJECT_API_NAME",
+							"value": "Account"
+						}
+					]
+				},
+				"description": "Describes the individual metadata for the specified object. Can also be used to create a new record for a given object. For example, this can be used to retrieve the metadata for the Account object using the GET method, or create a new Account object using the POST method."
+			},
+			"response": []
+		},
+		{
+			"name": "SObject Create Contact",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Successful POST request\", () => {\r",
+							"  pm.expect(pm.response.code).to.be.oneOf([201,202]);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"The response has all properties\", () => {\r",
+							"    //parse the response JSON and test three properties\r",
+							"    const responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson.id).to.be.a('string');\r",
+							"    pm.expect(responseJson.id).to.have.lengthOf(18);\r",
+							"    pm.expect(responseJson.success).to.be.a('boolean');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Id is a non-empty string\", function (){\r",
+							" const responseData = pm.response.json();\r",
+							" pm.expect(responseData.id).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Id should not be empty\")\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type header is application/json\", () => {\r",
+							"  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response time is less than 500ms\", () => {\r",
+							"  pm.expect(pm.response.responseTime).to.be.below(500);\r",
+							"});\r",
+							"\r",
+							"pm.collectionVariables.set(\"idC\", jsonData.id);\r",
+							"var rawBodyData = pm.request.body;\r",
+							"var parsedBodyData = JSON.parse(rawBodyData);\r",
+							"pm.collectionVariables.set(\"LastName\", parsedBodyData.LastName)\r",
+							"pm.collectionVariables.set(\"FirstName\",parsedBodyData.FirstName)\r",
+							"pm.collectionVariables.set(\"Email\",parsedBodyData.Email)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"LastName\": \"{{LastName}}\",\n    \"FirstName\": \"{{FirstName}}\",\n    \"Email\": \"{{Email}}\"\n    //\"Email\": \"{{Email}}\"\n}"
+				},
+				"url": {
+					"raw": "{{_endpoint}}/services/data/v{{version}}/sobjects/:SOBJECT_API_NAME",
+					"host": [
+						"{{_endpoint}}"
+					],
+					"path": [
+						"services",
+						"data",
+						"v{{version}}",
+						"sobjects",
+						":SOBJECT_API_NAME"
+					],
+					"variable": [
+						{
+							"key": "SOBJECT_API_NAME",
+							"value": "Contact"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SObject Basic Information Get Info about Contact",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							" pm.response.to.have.status(200);\r",
+							"});\r",
+							"pm.test(\"The Contact with created Data exists\", function () {\r",
+							" var jsonData = pm.response.json();\r",
+							" pm.expect(jsonData.LastName).to.eql(pm.collectionVariables.get(\"LastName\"))\r",
+							" pm.expect(jsonData.FirstName).to.eql(pm.collectionVariables.get(\"FirstName\"))\r",
+							" pm.expect(jsonData.Email).to.eql(pm.collectionVariables.get(\"Email\"))\r",
+							" });\r",
+							"\r",
+							"\r",
+							" /*pm.test(\"Should include object\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    var expectedObject = {\r",
+							"        \"FirstName\": \"testFirstName6\",\r",
+							"        \"LastName\": \"LastNameTest6\"\r",
+							"        //,        \"companyName\": \"ACME\"\r",
+							"    }\r",
+							"    pm.expect(jsonData).to.include(expectedObject);\r",
+							"\r",
+							"    // Optional check if properties actually exist\r",
+							"    pm.expect(jsonData).to.have.property('uid');\r",
+							"    pm.expect(jsonData).to.have.property('pid');\r",
+							"});*/\r",
+							"\r",
+							"\r",
+							" /*pm.test(\"The Contact with created First Name exists\", function () {\r",
+							" var jsonData = pm.response.json();\r",
+							" pm.expect(jsonData.recentItems[0].FirstName).to.eql(pm.collectionVariables.get(\"FirstName\"))\r",
+							" });*/"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "idC",
+							"value": "{{idC}}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{_endpoint}}/services/data/v{{version}}/sobjects/:SOBJECT_API_NAME/{{idC}}",
+					"host": [
+						"{{_endpoint}}"
+					],
+					"path": [
+						"services",
+						"data",
+						"v{{version}}",
+						"sobjects",
+						":SOBJECT_API_NAME",
+						"{{idC}}"
+					],
+					"variable": [
+						{
+							"key": "SOBJECT_API_NAME",
+							"value": "Contact"
+						}
+					]
+				},
+				"description": "Describes the individual metadata for the specified object. Can also be used to create a new record for a given object. For example, this can be used to retrieve the metadata for the Account object using the GET method, or create a new Account object using the POST method."
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{Access_Token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "clientId",
+			"value": "3MVG9k02hQhyUgQAO.a5UG.tc1LrRKr__x95jT_B0qF_wf_2cHbcfP4Ym0_jY5LwF9lY0Jnlder_.Qd2fuZxC"
+		},
+		{
+			"key": "clientSecret",
+			"value": "0BEF199DF1AF11F3B8A06B930C79CACA5EF8EF99CC7BE4EE06AFBEE9349D8376"
+		},
+		{
+			"key": "username",
+			"value": "michalina.szelag@brave-moose-rpiois.com"
+		},
+		{
+			"key": "password",
+			"value": "Alfabeta12"
+		},
+		{
+			"key": "url",
+			"value": "https://login.salesforce.com"
+		},
+		{
+			"key": "Access_Token",
+			"value": "00DQy000003KJaM!AQEAQNkg9b.BoDdAfLnfFeNqM9s66viuhHhmFrKxIk5nhej1vlYTztOTvV.6ewqi..mp1YafdBlYVxRH3f8BMAIVc7QNaWEE"
+		},
+		{
+			"key": "_accessToken",
+			"value": "6Cel800DQy000003KJaM888Qy0000000WkfOUOCG108WuilE1o7A7KsohymDKbsFpYIovf1oCNmwYv2deSGWz1N1IxwzTpR3r0ZS604rHde",
+			"type": "string"
+		},
+		{
+			"key": "_endpoint",
+			"value": "https://brave-moose-rpiois-dev-ed.trailblaze.my.salesforce.com",
+			"type": "string"
+		},
+		{
+			"key": "_userId",
+			"value": "005Qy0000029Ls6IAE",
+			"type": "string"
+		},
+		{
+			"key": "_orgId",
+			"value": "00DQy000003KJaM",
+			"type": "string"
+		},
+		{
+			"key": "version",
+			"value": "54.0",
+			"type": "string"
+		},
+		{
+			"key": "id",
+			"value": "001Qy000009QtidIAC",
+			"type": "string"
+		},
+		{
+			"key": "Name",
+			"value": "testName",
+			"type": "string"
+		},
+		{
+			"key": "idC",
+			"value": "test",
+			"type": "string"
+		},
+		{
+			"key": "LastName",
+			"value": "test",
+			"type": "string"
+		},
+		{
+			"key": "FirstName",
+			"value": "test",
+			"type": "string"
+		},
+		{
+			"key": "Email",
+			"value": "test@test.com"
+		}
+	]
+}
